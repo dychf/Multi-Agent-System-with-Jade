@@ -336,7 +336,7 @@ public class Principal {
 
         /*********
          * AGENT Collect 2
-         *********/
+         *********//*
         //1) Get the container where the agent will appear
         c = containerList.get(ConfigurationFile.LOCAL_CONTAINER_NAME);
         Assert.assertNotNull("This container does not exist", c);
@@ -351,9 +351,9 @@ public class Principal {
         ag = createNewDedaleAgent(c, agentName, CollectAgent.class.getName(), entityParametersC2);
         agentList.add(ag);
 
-        /*********
+        *//*********
          * AGENT Collect 3
-         *********/
+         *********//*
         //1) Get the container where the agent will appear
         c = containerList.get(ConfigurationFile.LOCAL_CONTAINER_NAME);
         Assert.assertNotNull("This container does not exist", c);
@@ -368,7 +368,7 @@ public class Principal {
         ag = createNewDedaleAgent(c, agentName, CollectAgent.class.getName(), entityParametersC3);
         agentList.add(ag);
 
-        /***************
+        *//***************
          * AGENT Tanker
          ***************/
         //1) Get the container where the agent will appear
@@ -387,12 +387,12 @@ public class Principal {
 
         /***************
          * AGENT Golem
-         ***************/
+         ***************//*
         c = containerList.get(ConfigurationFile.LOCAL_CONTAINER_NAME);
         agentName = "Golem";
         Object[] entityParametersg = {"My parameters"};
         ag = createNewDedaleAgent(c, agentName, DummyWumpusShift.class.getName(), entityParametersg);
-        agentList.add(ag);
+        agentList.add(ag);*/
 
         /*********************
          * All agents created
