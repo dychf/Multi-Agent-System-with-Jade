@@ -284,23 +284,6 @@ public class Principal_01 {
          *
          *****************************************************/
 
-        /*********
-         * AGENT DUMMY
-         *********/
-        //1) Get the container where the agent will appear
-        c = containerList.get(ConfigurationFile.LOCAL_CONTAINER_NAME);
-        Assert.assertNotNull("This container does not exist", c);
-
-        //2) Give the name of your agent, MUST be the same as the one given in the entities file.
-        agentName = "dychf_gogogo";
-
-        //3) If you want to give specific parameters to your agent, add them here
-        Object[] entityParameters1 = {"My parameters"};
-
-        //4) Give the class name of your agent to let the system instantiate it
-        ag = createNewDedaleAgent(c, agentName, MyFirstAgent.class.getName(), entityParameters1);
-        agentList.add(ag);
-
         /*********************
          * All agents created
          *********************/
