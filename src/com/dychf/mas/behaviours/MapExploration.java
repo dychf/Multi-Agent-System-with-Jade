@@ -7,6 +7,7 @@ import eu.su.mas.dedaleEtu.mas.agents.AgentInterface;
 import eu.su.mas.dedaleEtu.mas.knowledge.MapRepresentation;
 import eu.su.mas.dedaleEtu.mas.knowledge.MapRepresentation.MapAttribute;
 import jade.core.behaviours.SimpleBehaviour;
+import jade.core.behaviours.TickerBehaviour;
 
 import java.util.*;
 
@@ -14,133 +15,33 @@ import java.util.*;
 /**
  * @author ilyas Aroui
  */
-public class MapExploration extends SimpleBehaviour {
+public class MapExploration extends TickerBehaviour {
 
     private static final long serialVersionUID = 8567689731496787661L;
 
-    private boolean finished = false;
-    private MapRepresentation myMap;
-    private List<String> openNodes;
-    private Set<String> closedNodes;
-    private List<Couple<String, List<Couple<Observation, Integer>>>> ListeTresor;
-    private int exitValue;
-
-
     public MapExploration(final AbstractDedaleAgent myagent) {
-        super(myagent);
-
-        this.openNodes = new ArrayList<String>();
-        this.closedNodes = new HashSet<String>();
+        super(myagent, 1000);
     }
 
-
     @Override
-    public void action() {
-        exitValue = 1;
-        this.myMap = ((AgentInterface) this.myAgent).getMap();
-        this.ListeTresor = ((AgentInterface) this.myAgent).getListTresor();
+    protected void onTick() {
+        String myPosition = ((AbstractDedaleAgent) this.myAgent).getCurrentPosition();
+        System.out.println(this.myAgent.getLocalName() + " -- myCurrentPosition is: " + myPosition);
+        if (myPosition != null) {
+            //寻找可达节点
+            List<Couple<String, List<Couple<Observation, Integer>>>> lobs = ((AbstractDedaleAgent) this.myAgent).observe();
+            System.out.println(this.myAgent.getLocalName() + "--- list of observables:" + lobs);
 
-        if (this.myMap == null)
-            this.myMap = new MapRepresentation();
+            //getRight 记录宝藏信息
+            List<Couple<Observation, Integer>> lObservations = lobs.get(0).getRight();
+            System.out.println("发现宝藏:" + lObservations);
 
-        if (this.ListeTresor == null)
-            this.ListeTresor = new ArrayList<Couple<String, List<Couple<Observation, Integer>>>>();
+            Random random = new Random();
+            int moveId = 1 + random.nextInt(lobs.size() - 1);
 
-        try {
-            String myPosition = ((AbstractDedaleAgent) this.myAgent).getCurrentPosition();
-            if (myPosition != null) {
-                List<Couple<String, List<Couple<Observation, Integer>>>> lobs = ((AbstractDedaleAgent) this.myAgent).observe();
-                try {
-                    this.myAgent.doWait(1000);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                this.closedNodes.add(myPosition);
-                this.openNodes.remove(myPosition);
-                this.myMap.addNode(myPosition);
-                String nextNode = null;
-                Iterator<Couple<String, List<Couple<Observation, Integer>>>> iter = lobs.iterator();
-                while (iter.hasNext()) {
-                    Couple<String, List<Couple<Observation, Integer>>> node = iter.next();
-                    String nodeId = node.getLeft();
-                    if (!this.closedNodes.contains(nodeId)) {
-                        if (!this.openNodes.contains(nodeId)) {
-                            this.openNodes.add(nodeId);
-                            this.myMap.addNode(nodeId, MapAttribute.open);
-                            this.myMap.addEdge(myPosition, nodeId);
-                        } else {
-                            this.myMap.addEdge(myPosition, nodeId);
-                        }
-
-                        if (nextNode == null) nextNode = nodeId;
-                    }
-                    if (myPosition.equals(nodeId)) {
-                        try {
-                            Observation tresor = Observation.ANY_TREASURE;
-                            if (node.getRight() != null && node.getRight().size() > 0)
-                                tresor = node.getRight().get(0).getLeft();
-                            switch (tresor) {
-                                case DIAMOND:
-                                    this.myMap.addNode(nodeId, MapAttribute.DIAMOND);
-                                    if (!this.ListeTresor.contains(node))
-                                        this.ListeTresor.add(node);
-                                    break;
-                                case GOLD:
-                                    this.myMap.addNode(nodeId, MapAttribute.GOLD);
-                                    if (!this.ListeTresor.contains(node))
-                                        this.ListeTresor.add(node);
-                                    break;
-                            }
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
-                if (this.openNodes.isEmpty()) {
-                    System.out.println(((AbstractDedaleAgent) this.myAgent).getLocalName() + " : Exploration successufully done.");
-                    finished = true;
-                    exitValue = 3;
-                } else {
-                    if (nextNode == null) {
-                        int best_size = 9999;
-                        int best_i = 0;
-
-                        for (int i = 0; i < this.openNodes.size(); i++) {
-                            int current_size = (this.myMap.getShortestPath(myPosition, this.openNodes.get(i))).size();
-
-                            if (current_size < best_size) {
-                                best_i = i;
-                                best_size = current_size;
-                            }
-                        }
-                        nextNode = this.myMap.getShortestPath(myPosition, this.openNodes.get(best_i)).get(0);
-                    }
-
-                    /**
-                     * 移动失败, 表明被挡住
-                     */
-                    if (!((AbstractDedaleAgent) this.myAgent).moveTo(nextNode)) {
-                        exitValue = 2;
-                        finished = true;
-                    }
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("moveID---" + moveId);
+            //getLeft用于获取节点值
+            ((AbstractDedaleAgent) this.myAgent).moveTo(lobs.get(moveId).getLeft());
         }
-        finished = true;
     }
-
-    public int onEnd() {
-        ((AgentInterface) this.myAgent).setMap(this.myMap);
-        ((AgentInterface) this.myAgent).setListTresor(this.ListeTresor);
-        return exitValue;
-    }
-
-
-    @Override
-    public boolean done() {
-        return finished;
-    }
-
 }
