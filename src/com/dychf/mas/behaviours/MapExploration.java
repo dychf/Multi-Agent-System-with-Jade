@@ -1,11 +1,10 @@
 package com.dychf.mas.behaviours;
 
+import com.dychf.mas.agents.AgentInterface;
+import com.dychf.mas.knowledge.MapRepresentation;
 import dataStructures.tuple.Couple;
 import eu.su.mas.dedale.env.Observation;
 import eu.su.mas.dedale.mas.AbstractDedaleAgent;
-import eu.su.mas.dedaleEtu.mas.agents.AgentInterface;
-import eu.su.mas.dedaleEtu.mas.knowledge.MapRepresentation;
-import eu.su.mas.dedaleEtu.mas.knowledge.MapRepresentation.MapAttribute;
 import jade.core.behaviours.SimpleBehaviour;
 import jade.core.behaviours.TickerBehaviour;
 
@@ -15,35 +14,101 @@ import java.util.*;
 /**
  * @author ilyas Aroui
  */
-public class MapExploration extends TickerBehaviour {
+public class MapExploration extends SimpleBehaviour {
 
     private static final long serialVersionUID = 8567689731496787661L;
 
+    private MapRepresentation myMap;
+    private List<String> openNodes;
+    private Set<String> closedNodes;
+    private boolean finished = false;
+    private int exitValue;
+
     public MapExploration(final AbstractDedaleAgent myagent) {
-        super(myagent, 1000);
+        super(myagent);
+        this.openNodes = new ArrayList<String>();
+        this.closedNodes = new HashSet<String>();
     }
 
     @Override
-    protected void onTick() {
-        String myPosition = ((AbstractDedaleAgent) this.myAgent).getCurrentPosition();
-        System.out.println(this.myAgent.getLocalName() + " -- myCurrentPosition is: " + myPosition);
-        if (myPosition != null) {
-            //寻找可达节点
-            List<Couple<String, List<Couple<Observation, Integer>>>> lobs = ((AbstractDedaleAgent) this.myAgent).observe();
-            System.out.println(this.myAgent.getLocalName() + "--- list of observables:" + lobs);
+    public void action() {
+        this.myMap = ((AgentInterface) this.myAgent).getMap();
+        if (this.myMap == null)
+            this.myMap = new MapRepresentation();
 
-            //getRight 记录宝藏信息
-            List<Couple<Observation, Integer>> lObservations = lobs.get(0).getRight();
-            System.out.println("发现宝藏:" + lObservations);
+        try {
+            this.myAgent.doWait(1000);
+            String myPosition = ((AbstractDedaleAgent) this.myAgent).getCurrentPosition();
+            if (myPosition != null) {
 
-            if (lobs.size() > 0) {
-                Random random = new Random();
-                int moveId = 1 + random.nextInt(lobs.size() - 1);
+                //得到后续节点列表
+                List<Couple<String, List<Couple<Observation, Integer>>>> lobs = ((AbstractDedaleAgent) this.myAgent).observe();
 
-                System.out.println("moveID---" + moveId);
-                //getLeft用于获取节点值
-                ((AbstractDedaleAgent) this.myAgent).moveTo(lobs.get(moveId).getLeft());
+                this.closedNodes.add(myPosition);
+                this.openNodes.remove(myPosition);
+                this.myMap.addNode(myPosition);
+
+                String nextNode = null;
+                Iterator<Couple<String, List<Couple<Observation, Integer>>>> iter = lobs.iterator();
+
+                //对可达节点进行遍历
+                while (iter.hasNext()) {
+                    Couple<String, List<Couple<Observation, Integer>>> node = iter.next();
+                    String nodeId = node.getLeft();
+
+                    if (!this.closedNodes.contains(nodeId)) {
+
+                        if (!this.openNodes.contains(nodeId)) {
+                            this.openNodes.add(nodeId);
+                            this.myMap.addNode(nodeId, MapRepresentation.MapAttribute.open);
+                            this.myMap.addEdge(myPosition, nodeId);
+                        } else {
+                            this.myMap.addEdge(myPosition, nodeId);
+                        }
+                        if (nextNode == null) nextNode = nodeId;
+                    }
+                }
+
+                if (this.openNodes.isEmpty()) {
+                    //遍历完成
+                    System.out.println(((AbstractDedaleAgent) this.myAgent).getLocalName() + " : Exploration successufully done.");
+                    finished = true;
+                    exitValue = 3;
+                } else {
+                    if (nextNode == null) {
+                        int best_size = 9999;//距离节点的路径长度
+                        int best_i = 0;//可达节点的下标位置, 用于记录最近的节点
+                        //从可达节点中计算出最近的节点
+                        for (int i = 0; i < this.openNodes.size(); i++) {
+                            int current_size = (this.myMap.getShortestPath(myPosition, this.openNodes.get(i))).size();
+                            if (current_size < best_size) {
+                                best_i = i;
+                                best_size = current_size;
+                            }
+                        }
+                        //到最近的节点路径上, 要走的第一个节点
+                        nextNode = this.myMap.getShortestPath(myPosition, this.openNodes.get(best_i)).get(0);
+                    }
+
+                    //向计算出的节点移动
+                    if (!((AbstractDedaleAgent) this.myAgent).moveTo(nextNode)) {
+                        exitValue = 2;
+                        finished = true;
+                    }
+                }
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+    }
+
+    public int onEnd() {
+        ((AgentInterface) this.myAgent).setMap(this.myMap);
+        return exitValue;
+    }
+
+    @Override
+    public boolean done() {
+        return finished;
     }
 }
