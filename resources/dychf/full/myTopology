@@ -1,7 +1,7 @@
 DGS004
 null 0 0
 cg  "stylesheet":"node {
-                  	size: 10px;
+                  	size: 15px;
                   	stroke-mode: plain;
                   	stroke-color: yellow;
                   	stroke-width: 0;
@@ -10,8 +10,6 @@ cg  "stylesheet":"node {
                   	text-offset: 3;
                     text-mode: hidden;
                   }"
-cg  "ui.quality":true
-cg  "ui.antialias":true
 an "0_0" label: "0_0"
 an "1_0" label: "1_0"
 an "0_1" label: "0_1"

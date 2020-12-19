@@ -2,6 +2,7 @@ package com.dychf.gen;
 
 import java.util.Random;
 
+import com.dychf.princ.ConfigurationFile;
 import org.graphstream.algorithm.generator.DorogovtsevMendesGenerator;
 import org.graphstream.algorithm.generator.Generator;
 import org.graphstream.algorithm.generator.GridGenerator;
@@ -17,12 +18,9 @@ import org.graphstream.graph.implementations.SingleGraph;
  */
 public class GenerateMASInfo {
 
-    public static Integer topologySize = 20;
-    public static Integer exploNum = 10;
-
     public static void main(String[] args) {
-        genTopology(false);
-        //genEntities();
+        //genTopology(false);
+        genEntities(ConfigurationFile.exploNum);
     }
 
     public static void genTopology(boolean full) {
@@ -40,7 +38,7 @@ public class GenerateMASInfo {
                 "                  }\"\n" +
                 "cg  \"ui.quality\":true\n" +
                 "cg  \"ui.antialias\":true");
-        Graph graph = generateGraph(false, topologySize);
+        Graph graph = generateGraph(false, ConfigurationFile.topologySize);
         Iterable<? extends Node> eachNode = graph.getEachNode();
         for (Node node : eachNode) {
             System.out.println("an \"" + node + "\" label: \"" + node + "\"");
@@ -62,10 +60,10 @@ public class GenerateMASInfo {
         }
     }
 
-    public static void genEntities() {
+    public static void genEntities(int exploNum) {
         //agentExplo:Explo1:4:0_0:0:0:0:2:0
         System.out.println("mapname:entities");
-        Graph graph = generateGraph(false, topologySize);
+        Graph graph = generateGraph(false, ConfigurationFile.topologySize);
         Iterable<? extends Node> nodes = graph.getEachNode();
         int flag = 0;
         for (Node node : nodes) {

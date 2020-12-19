@@ -272,7 +272,7 @@ public class Principal {
          *
          *****************************************************/
 
-        for (int i = 0; i < GenerateMASInfo.exploNum; i++) {
+        for (int i = 0; i < ConfigurationFile.exploNum; i++) {
 
             /*********
              * AGENT Explo
