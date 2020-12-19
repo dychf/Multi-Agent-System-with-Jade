@@ -1,5 +1,6 @@
 package com.dychf.princ;
 
+import com.dychf.gen.GenerateMASInfo;
 import com.dychf.mas.agents.ExploreAgent;
 import eu.su.mas.dedale.mas.AbstractDedaleAgent;
 import eu.su.mas.dedale.mas.agents.GateKeeperAgent;
@@ -271,39 +272,25 @@ public class Principal {
          *
          *****************************************************/
 
-        /*********
-         * AGENT Explo1
-         *********/
-        //1) Get the container where the agent will appear
-        c = containerList.get(ConfigurationFile.LOCAL_CONTAINER_NAME);
-        Assert.assertNotNull("This container does not exist", c);
+        for (int i = 0; i < GenerateMASInfo.exploNum; i++) {
 
-        //2) Give the name of your agent, MUST be the same as the one given in the entities file.
-        agentName = "Explo1";
+            /*********
+             * AGENT Explo
+             *********/
+            //1) Get the container where the agent will appear
+            c = containerList.get(ConfigurationFile.LOCAL_CONTAINER_NAME);
+            Assert.assertNotNull("This container does not exist", c);
 
-        //3) If you want to give specific parameters to your agent, add them here
-        Object[] entityParameters1 = {"My parameters"};
+            //2) Give the name of your agent, MUST be the same as the one given in the entities file.
+            agentName = "Explo" + i;
 
-        //4) Give the class name of your agent to let the system instantiate it
-        ag = createNewDedaleAgent(c, agentName, ExploreAgent.class.getName(), entityParameters1);
-        agentList.add(ag);
+            //3) If you want to give specific parameters to your agent, add them here
+            Object[] entityParameters2 = {"My parameters"};
 
-        /*********
-         * AGENT Explo2
-         *********/
-        //1) Get the container where the agent will appear
-        c = containerList.get(ConfigurationFile.LOCAL_CONTAINER_NAME);
-        Assert.assertNotNull("This container does not exist", c);
-
-        //2) Give the name of your agent, MUST be the same as the one given in the entities file.
-        agentName = "Explo2";
-
-        //3) If you want to give specific parameters to your agent, add them here
-        Object[] entityParameters2 = {"My parameters"};
-
-        //4) Give the class name of your agent to let the system instantiate it
-        ag = createNewDedaleAgent(c, agentName, ExploreAgent.class.getName(), entityParameters2);
-        agentList.add(ag);
+            //4) Give the class name of your agent to let the system instantiate it
+            ag = createNewDedaleAgent(c, agentName, ExploreAgent.class.getName(), entityParameters2);
+            agentList.add(ag);
+        }
 
         /*********************
          * All agents created
@@ -323,8 +310,9 @@ public class Principal {
 
         for (final AgentController ac : agentList) {
             try {
+                Thread.currentThread().sleep(100);
                 ac.start();
-            } catch (StaleProxyException e) {
+            } catch (StaleProxyException | InterruptedException e) {
                 e.printStackTrace();
             }
 

@@ -1,0 +1,11 @@
+mapname:entities
+agentExplo:Explo0:4:0_0:0:0:0:0:2
+agentExplo:Explo1:4:1_0:0:0:0:0:2
+agentExplo:Explo2:4:0_1:0:0:0:0:2
+agentExplo:Explo3:4:1_1:0:0:0:0:2
+agentExplo:Explo4:4:2_0:0:0:0:0:2
+agentExplo:Explo5:4:2_1:0:0:0:0:2
+agentExplo:Explo6:4:0_2:0:0:0:0:2
+agentExplo:Explo7:4:1_2:0:0:0:0:2
+agentExplo:Explo8:4:2_2:0:0:0:0:2
+agentExplo:Explo9:4:3_0:0:0:0:0:2

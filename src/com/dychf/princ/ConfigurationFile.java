@@ -10,8 +10,8 @@ import eu.su.mas.dedale.env.EnvironmentType;
 public final class ConfigurationFile {
 
     public static String topology_path = "resources/dychf/test1/myTopology";
-    public static String element_path = "resources/dychf/test1/map2018-elements";
-    public static String entity_path = "resources/dychf/test1/map2018-entities";
+    public static String element_path = "resources/dychf/test1/myElements";
+    public static String entity_path = "resources/dychf/test1/myEntities";
 
     /******************************
      *
