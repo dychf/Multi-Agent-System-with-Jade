@@ -36,12 +36,14 @@ public class MapExploration extends TickerBehaviour {
             List<Couple<Observation, Integer>> lObservations = lobs.get(0).getRight();
             System.out.println("发现宝藏:" + lObservations);
 
-            Random random = new Random();
-            int moveId = 1 + random.nextInt(lobs.size() - 1);
+            if (lobs.size() > 0) {
+                Random random = new Random();
+                int moveId = 1 + random.nextInt(lobs.size() - 1);
 
-            System.out.println("moveID---" + moveId);
-            //getLeft用于获取节点值
-            ((AbstractDedaleAgent) this.myAgent).moveTo(lobs.get(moveId).getLeft());
+                System.out.println("moveID---" + moveId);
+                //getLeft用于获取节点值
+                ((AbstractDedaleAgent) this.myAgent).moveTo(lobs.get(moveId).getLeft());
+            }
         }
     }
 }
