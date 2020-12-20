@@ -1,14 +1,13 @@
 DGS004
 null 0 0
 cg  "stylesheet":"node {
-                  	size: 30px;
+                  	size: 20px;
                   	stroke-mode: plain;
                   	stroke-color: yellow;
                   	stroke-width: 0;
                   	text-background-mode: plain;
                   	text-padding: 2;
                   	text-offset: 3;
-                    text-mode: hidden;
                   }"
 an "0_0" label: "0_0"
 an "1_0" label: "1_0"

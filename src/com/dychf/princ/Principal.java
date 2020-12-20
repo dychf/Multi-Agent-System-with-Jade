@@ -35,7 +35,7 @@ public class Principal {
     private static List<AgentController> agentList;// agents's ref
     private static Runtime rt;
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException, StaleProxyException {
 
         if (ConfigurationFile.COMPUTERisMAIN) {
             //Whe should create the Platform and the GateKeeper, whether the platform is distributed or not
@@ -304,18 +304,16 @@ public class Principal {
      *
      * @param agentList
      */
-    private static void startAgents(List<AgentController> agentList) {
+    private static void startAgents(List<AgentController> agentList) throws StaleProxyException, InterruptedException {
 
         System.out.println("Starting agents...");
 
-        for (final AgentController ac : agentList) {
-            try {
-                Thread.currentThread().sleep(100);
-                ac.start();
-            } catch (StaleProxyException | InterruptedException e) {
-                e.printStackTrace();
-            }
 
+        for (int i = 0; i < agentList.size(); i++) {
+            AgentController ac = agentList.get(i);
+            ac.start();
+            if (i == 0)
+                Thread.currentThread().sleep(10000);
         }
         System.out.println("Agents started...");
     }

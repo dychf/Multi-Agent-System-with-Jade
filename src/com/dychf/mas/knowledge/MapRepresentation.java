@@ -21,7 +21,7 @@ import java.util.*;
 public class MapRepresentation implements Serializable {
 
     public enum MapAttribute {
-        agent, open, DIAMOND, GOLD, closed
+        agent, open, closed
     }
 
     private static final long serialVersionUID = -1333959882640838272L;
@@ -37,10 +37,9 @@ public class MapRepresentation implements Serializable {
     private String defaultNodeStyle = "node {" + "fill-color: black;" + " size-mode:fit;text-alignment:under; text-size:14;text-color:white;text-background-mode:rounded-box;text-background-color:black;}";
     private String nodeStyle_agent = "node.agent {" + "fill-color: forestgreen;" + "}";
     private String nodeStyle_open = "node.open {" + "fill-color: blue;" + "}";
-    private String nodeStyle_Diamond = "node.DIAMOND {" + "fill-color: red;" + "}";
-    private String nodeStyle_Gold = "node.GOLD {" + "fill-color: yellow;" + "}";
+    private String nodeStyle_closed = "node.closed {" + "fill-color: red;" + "}";
 
-    private String nodeStyle = defaultNodeStyle + nodeStyle_agent + nodeStyle_open + nodeStyle_Diamond + nodeStyle_Gold;
+    private String nodeStyle = defaultNodeStyle + nodeStyle_agent + nodeStyle_open + nodeStyle_closed;
 
 
     public MapRepresentation() {
@@ -179,7 +178,6 @@ public class MapRepresentation implements Serializable {
             //Do not add an already existing one
             this.nbEdges--;
         }
-
     }
 
     public Graph getGraph() {

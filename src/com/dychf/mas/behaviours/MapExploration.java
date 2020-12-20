@@ -3,10 +3,13 @@ package com.dychf.mas.behaviours;
 import com.dychf.mas.agents.AgentInterface;
 import com.dychf.mas.agents.ExploreAgent;
 import com.dychf.mas.knowledge.MapRepresentation;
+import com.dychf.princ.ConfigurationFile;
 import dataStructures.tuple.Couple;
 import eu.su.mas.dedale.env.Observation;
 import eu.su.mas.dedale.mas.AbstractDedaleAgent;
+import jade.core.AID;
 import jade.core.behaviours.SimpleBehaviour;
+import jade.lang.acl.ACLMessage;
 
 import java.util.*;
 
@@ -19,6 +22,7 @@ public class MapExploration extends SimpleBehaviour {
     private static final long serialVersionUID = 8567689731496787661L;
 
     private boolean finished = false;
+    private int exitValue;
     /**
      * 智能体对当前环境的了解
      */
@@ -40,6 +44,8 @@ public class MapExploration extends SimpleBehaviour {
 
     @Override
     public void action() {
+        exitValue = 1;
+
         this.myMap = ((AgentInterface) this.myAgent).getMap();
         if (this.myMap == null)
             this.myMap = new MapRepresentation();
@@ -55,7 +61,7 @@ public class MapExploration extends SimpleBehaviour {
              * Just added here to let you see what the agent is doing, otherwise he will be too quick
              */
             try {
-                this.myAgent.doWait(1000);
+                this.myAgent.doWait(500);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -88,6 +94,7 @@ public class MapExploration extends SimpleBehaviour {
             if (this.openNodes.isEmpty()) {
                 //Explo finished
                 finished = true;
+                exitValue = 3;
                 System.out.println("Exploration successufully done, behaviour removed.");
             } else {
                 //4) select next move.
@@ -98,14 +105,22 @@ public class MapExploration extends SimpleBehaviour {
                     //chose one, compute the path and take the first step.
                     nextNode = this.myMap.getShortestPath(myPosition, this.openNodes.get(0)).get(0);
                 }
-                ((AbstractDedaleAgent) this.myAgent).moveTo(nextNode);
+                if (!((AbstractDedaleAgent) this.myAgent).moveTo(nextNode)) {
+                    exitValue = 2;
+                    finished = true;
+                }
             }
         }
+        finished = true;
     }
 
     @Override
     public boolean done() {
         ((AgentInterface) this.myAgent).setMap(this.myMap);
         return finished;
+    }
+
+    public int onEnd() {
+        return exitValue;
     }
 }

@@ -22,6 +22,7 @@ public class ReceiveMap extends SimpleBehaviour {
     private Map<String[], LinkedList<String>> sgSender;
     private MapRepresentation mapReceiver;
     private boolean finished = false;
+    private int exitValue;
 
     public ReceiveMap(final Agent myAgent) {
         super(myAgent);
@@ -29,7 +30,7 @@ public class ReceiveMap extends SimpleBehaviour {
 
     @Override
     public void action() {
-
+        exitValue = 1;
         this.mapReceiver = ((AgentInterface) this.myAgent).getMap();
         final MessageTemplate msgTemplate_map = MessageTemplate.and(
                 MessageTemplate.MatchProtocol("map_explo"),
@@ -68,11 +69,16 @@ public class ReceiveMap extends SimpleBehaviour {
             }
             ((AgentInterface) this.myAgent).setMap(this.mapReceiver);
         }
+        finished = true;
     }
 
     @Override
     public boolean done() {
         return finished;
+    }
+
+    public int onEnd() {
+        return exitValue;
     }
 }
 	

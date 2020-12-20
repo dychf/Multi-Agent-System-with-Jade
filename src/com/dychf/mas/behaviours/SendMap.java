@@ -21,6 +21,7 @@ public class SendMap extends SimpleBehaviour {
 
     private MapRepresentation myMap;
     private boolean finished = false;
+    private int exitValue;
 
     public SendMap(final Agent myagent) {
         super(myagent);
@@ -28,6 +29,7 @@ public class SendMap extends SimpleBehaviour {
 
     @Override
     public void action() {
+        exitValue = 1;
         this.myMap = ((AgentInterface) this.myAgent).getMap();
 
         ACLMessage msg_map = new ACLMessage(ACLMessage.INFORM);
@@ -51,10 +53,15 @@ public class SendMap extends SimpleBehaviour {
         } else {
             System.out.println("map_null before sending");
         }
+        finished = true;
     }
 
     @Override
     public boolean done() {
         return finished;
+    }
+
+    public int onEnd() {
+        return exitValue;
     }
 }
