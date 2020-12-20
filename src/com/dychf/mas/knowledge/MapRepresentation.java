@@ -21,7 +21,7 @@ import java.util.*;
 public class MapRepresentation implements Serializable {
 
     public enum MapAttribute {
-        agent, open, closed, DIAMOND, GOLD
+        agent, open, DIAMOND, GOLD, closed
     }
 
     private static final long serialVersionUID = -1333959882640838272L;

@@ -8,7 +8,7 @@ import eu.su.mas.dedale.env.EnvironmentType;
  * @author hc
  */
 public final class ConfigurationFile {
-    public static final Integer topologySize = 20;
+    public static final Integer topologySize = 10;
     public static final Integer exploNum = 2;
 
     public static String topology_path = "resources/dychf/test1/myTopology";

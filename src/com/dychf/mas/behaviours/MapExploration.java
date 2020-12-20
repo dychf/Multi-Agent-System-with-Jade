@@ -1,12 +1,12 @@
 package com.dychf.mas.behaviours;
 
 import com.dychf.mas.agents.AgentInterface;
+import com.dychf.mas.agents.ExploreAgent;
 import com.dychf.mas.knowledge.MapRepresentation;
 import dataStructures.tuple.Couple;
 import eu.su.mas.dedale.env.Observation;
 import eu.su.mas.dedale.mas.AbstractDedaleAgent;
 import jade.core.behaviours.SimpleBehaviour;
-import jade.core.behaviours.TickerBehaviour;
 
 import java.util.*;
 
@@ -18,14 +18,22 @@ public class MapExploration extends SimpleBehaviour {
 
     private static final long serialVersionUID = 8567689731496787661L;
 
-    private MapRepresentation myMap;
-    private List<String> openNodes;
-    private Set<String> closedNodes;
     private boolean finished = false;
-    private int exitValue;
+    /**
+     * 智能体对当前环境的了解
+     */
+    private MapRepresentation myMap;
+    /**
+     * 智能体可达但是未访问的节点
+     */
+    private List<String> openNodes;
+    /**
+     * 智能体访问过的节点
+     */
+    private Set<String> closedNodes;
 
-    public MapExploration(final AbstractDedaleAgent myagent) {
-        super(myagent);
+    public MapExploration(final ExploreAgent myAgent) {
+        super(myAgent);
         this.openNodes = new ArrayList<String>();
         this.closedNodes = new HashSet<String>();
     }
@@ -36,79 +44,68 @@ public class MapExploration extends SimpleBehaviour {
         if (this.myMap == null)
             this.myMap = new MapRepresentation();
 
-        try {
-            this.myAgent.doWait(1000);
-            String myPosition = ((AbstractDedaleAgent) this.myAgent).getCurrentPosition();
-            if (myPosition != null) {
+        //0) Retrieve the current position
+        String myPosition = ((AbstractDedaleAgent) this.myAgent).getCurrentPosition();
 
-                //得到后续节点列表
-                List<Couple<String, List<Couple<Observation, Integer>>>> lobs = ((AbstractDedaleAgent) this.myAgent).observe();
+        if (myPosition != null) {
+            //List of observable from the agent's current position
+            List<Couple<String, List<Couple<Observation, Integer>>>> lobs = ((AbstractDedaleAgent) this.myAgent).observe();//myPosition
 
-                this.closedNodes.add(myPosition);
-                this.openNodes.remove(myPosition);
-                this.myMap.addNode(myPosition);
+            /**
+             * Just added here to let you see what the agent is doing, otherwise he will be too quick
+             */
+            try {
+                this.myAgent.doWait(1000);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
-                String nextNode = null;
-                Iterator<Couple<String, List<Couple<Observation, Integer>>>> iter = lobs.iterator();
+            //1) remove the current node from openlist and add it to closedNodes.
+            this.closedNodes.add(myPosition);
+            this.openNodes.remove(myPosition);
 
-                //对可达节点进行遍历
-                while (iter.hasNext()) {
-                    Couple<String, List<Couple<Observation, Integer>>> node = iter.next();
-                    String nodeId = node.getLeft();
+            this.myMap.addNode(myPosition, MapRepresentation.MapAttribute.closed);
 
-                    if (!this.closedNodes.contains(nodeId)) {
-
-                        if (!this.openNodes.contains(nodeId)) {
-                            this.openNodes.add(nodeId);
-                            this.myMap.addNode(nodeId, MapRepresentation.MapAttribute.open);
-                            this.myMap.addEdge(myPosition, nodeId);
-                        } else {
-                            this.myMap.addEdge(myPosition, nodeId);
-                        }
-                        if (nextNode == null) nextNode = nodeId;
+            //2) get the surrounding nodes and, if not in closedNodes, add them to open nodes.
+            String nextNode = null;
+            Iterator<Couple<String, List<Couple<Observation, Integer>>>> iter = lobs.iterator();
+            while (iter.hasNext()) {
+                String nodeId = iter.next().getLeft();
+                if (!this.closedNodes.contains(nodeId)) {
+                    if (!this.openNodes.contains(nodeId)) {
+                        this.openNodes.add(nodeId);
+                        this.myMap.addNode(nodeId, MapRepresentation.MapAttribute.open);
+                        this.myMap.addEdge(myPosition, nodeId);
+                    } else {
+                        //the node exist, but not necessarily the edge
+                        this.myMap.addEdge(myPosition, nodeId);
                     }
-                }
-
-                if (this.openNodes.isEmpty()) {
-                    //遍历完成
-                    System.out.println(((AbstractDedaleAgent) this.myAgent).getLocalName() + " : Exploration successufully done.");
-                    finished = true;
-                    exitValue = 3;
-                } else {
-                    if (nextNode == null) {
-                        int best_size = 9999;//距离节点的路径长度
-                        int best_i = 0;//可达节点的下标位置, 用于记录最近的节点
-                        //从可达节点中计算出最近的节点
-                        for (int i = 0; i < this.openNodes.size(); i++) {
-                            int current_size = (this.myMap.getShortestPath(myPosition, this.openNodes.get(i))).size();
-                            if (current_size < best_size) {
-                                best_i = i;
-                                best_size = current_size;
-                            }
-                        }
-                        //到最近的节点路径上, 要走的第一个节点
-                        nextNode = this.myMap.getShortestPath(myPosition, this.openNodes.get(best_i)).get(0);
-                    }
-
-                    //向计算出的节点移动
-                    if (!((AbstractDedaleAgent) this.myAgent).moveTo(nextNode)) {
-                        exitValue = 2;
-                        finished = true;
-                    }
+                    if (nextNode == null) nextNode = nodeId;
                 }
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 
-    public int onEnd() {
-        ((AgentInterface) this.myAgent).setMap(this.myMap);
-        return exitValue;
+            //3) while openNodes is not empty, continues.
+            if (this.openNodes.isEmpty()) {
+                //Explo finished
+                finished = true;
+                System.out.println("Exploration successufully done, behaviour removed.");
+            } else {
+                //4) select next move.
+                //4.1 If there exist one open node directly reachable, go for it,
+                //	 otherwise choose one from the openNode list, compute the shortestPath and go for it
+                if (nextNode == null) {
+                    //no directly accessible openNode
+                    //chose one, compute the path and take the first step.
+                    nextNode = this.myMap.getShortestPath(myPosition, this.openNodes.get(0)).get(0);
+                }
+                ((AbstractDedaleAgent) this.myAgent).moveTo(nextNode);
+            }
+        }
     }
 
     @Override
     public boolean done() {
+        ((AgentInterface) this.myAgent).setMap(this.myMap);
         return finished;
     }
 }
